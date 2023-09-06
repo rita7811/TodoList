@@ -45,43 +45,44 @@ void SeeAllTodos()
 {
     if (todos.Count == 0)
     {
-        Console.WriteLine("Sorry, your TODOs is empty");
-
+        ShowNoTodosMessage();
+        return;
     }
-    else
+    for (int i = 0; i < todos.Count; i++)
     {
-        for (int i = 0; i < todos.Count; i++)
-        {
-            Console.WriteLine($"{i + 1}. {todos[i]}");
+        Console.WriteLine($"{i + 1}. {todos[i]}");
 
-        }
     }
 }
 
 
 void AddTodo()
 {
-    bool isUserAddChoice = false;
-    while (!isUserAddChoice)
+    string description;
+    do
     {
         Console.WriteLine("Please enter the TODO description:");
-        var addTodo = Console.ReadLine();
-
-        if (addTodo == "")
-        {
-            Console.WriteLine("The description cannot be empty.");
-        }
-        else if (todos.Contains(addTodo))
-        {
-            Console.WriteLine("Sorry, the description must be unique.");
-        }
-        else
-        {
-            isUserAddChoice = true;
-            todos.Add(addTodo);
-            Console.WriteLine($"TODO successfully added: {addTodo}");
-        }
+        description = Console.ReadLine();
     }
+    while (!IsDescriptionValid(description));
+
+    todos.Add(description);
+    Console.WriteLine($"TODO successfully added: {description}");
+}
+
+bool IsDescriptionValid(string description) {
+
+    if (description == "")
+    {
+        Console.WriteLine("The description cannot be empty.");
+        return false;
+    }
+    if (todos.Contains(description))
+    {
+        Console.WriteLine("Sorry, the description must be unique.");
+        return false;
+    }
+    return true;
 }
 
 
@@ -89,35 +90,49 @@ void RemoveTodo()
 {
     if (todos.Count == 0)
     {
-        Console.WriteLine("Sorry, no TODOs have been added yet.");
+        ShowNoTodosMessage();
         return;
 
     }
 
-    bool isIndexValid = false;
-    while (!isIndexValid)
+    int index;
+    do
     {
         Console.WriteLine("Please select the index of the TODO you want to remove:");
         SeeAllTodos();
-        var removeTodo = Console.ReadLine();
-
-        if (removeTodo == "")
-        {
-            Console.WriteLine("Sorry, selected index cannot be empty.");
-            continue;
-        }
-
-        if (int.TryParse(removeTodo, out int index) && index <= todos.Count && index > 0)
-        {
-            var indexOfTodo = index - 1;
-            var deletedTodo = todos[indexOfTodo];
-            todos.RemoveAt(indexOfTodo);
-            isIndexValid = true;
-            Console.WriteLine($"TODO removed: {deletedTodo}");
-        }
-        else
-        {
-            Console.WriteLine("Sorry, the given index is not valid.");
-        }
     }
+    while (!TryReadIndex(out index));
+
+    RemoveTodoAtIndex(index - 1);
+}
+
+void RemoveTodoAtIndex(int index)
+{
+    var deletedTodo = todos[index];
+    todos.RemoveAt(index);
+    Console.WriteLine($"TODO removed: {deletedTodo}");
+}
+
+bool TryReadIndex(out int index)
+{
+    var removeTodo = Console.ReadLine();
+
+    if (removeTodo == "")
+    {
+        Console.WriteLine("Sorry, selected index cannot be empty.");
+        index = 0;
+        return false;
+    }
+    if (int.TryParse(removeTodo, out index) && index <= todos.Count && index > 0)
+    {
+        return true;
+    }
+    Console.WriteLine("Sorry, the given index is not valid.");
+    return false;   
+}
+
+
+static void ShowNoTodosMessage()
+{
+    Console.WriteLine("Sorry, no TODOs have been added yet.");
 }
